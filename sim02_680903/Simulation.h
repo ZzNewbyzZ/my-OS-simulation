@@ -5,6 +5,7 @@
 // header files
 #include <stdio.h>
 #include <pthread.h>
+#include <stdlib.h>
 #include "StringUtils.h"
 #include "ConfigAccess.h"
 #include "MetaDataAccess.h"
@@ -65,7 +66,7 @@ typedef struct ProcessData
 
 // function prototypes
 void runSimulation(ConfigDataType *configDataPtr, OpCodeType *mdDataPtr);
-void createPCB(Data *data, int *totalTime, PCB *pcb, Process *localProcess);
+PCB *createPCB(Data *data, int *totalTime, PCB *pcb, Process *localProcess);
 SimCodeMessages runProcess(Process *process, ProcessData *processData, Timer *timer, Boolean MONITOR_FLAG);
 void *ioProcess(void *arg);
 void logToFile(FILE *filePtr, ProcessData *processDataPtr);

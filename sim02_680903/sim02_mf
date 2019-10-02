@@ -1,17 +1,16 @@
 CC = gcc
 DEBUG = -g
-PTHREAD = -lpthread
 CFLAGS = -Wall -std=c99 -pedantic -c $(DEBUG)
 LFLAGS = -Wall -std=c99 -pedantic $(DEBUG)
 
 UploadFiles : Main.o Simulation.o MetaDataAccess.o ConfigAccess.o StringUtils.o simtimer.o
-	$(CC) $(LFLAGS) Main.o Simulation.o MetaDataAccess.o ConfigAccess.o StringUtils.o simtimer.o -o Simulator -pthread
+	$(CC) $(LFLAGS) Main.o Simulation.o MetaDataAccess.o ConfigAccess.o StringUtils.o simtimer.o -o Simulator -lpthread
 
 Main.o : Main.c
 	$(CC) $(CFLAGS) Main.c
 	
 Simulation.o : Simulation.c Simulation.h
-	$(CC) $(CFLAGS) Simulation.c -pthread
+	$(CC) $(CFLAGS) Simulation.c -lpthread
 
 MetaDataAccess.o : MetaDataAccess.c MetaDataAccess.h
 	$(CC) $(CFLAGS) MetaDataAccess.c

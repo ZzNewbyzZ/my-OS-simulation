@@ -100,7 +100,7 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	
 	// Create the PCB
 		// function: createPCB
-	createPCB(data, &timeLeft, pcb, localProcess);
+	pcb = createPCB(data, &timeLeft, pcb, localProcess);
 	
 	// Lap timer
 		// function: accessTimer
@@ -216,13 +216,13 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	// EXIT
 	fclose(filePtr);
 	
+	processDataPtr = clearProcessDataList(processDataPtr);
+	pcb = clearPCBlist(pcb);
+	
 	free(timer);
 	free(localProcess);
 	free(data);
-	
-	clearProcessDataList(processDataPtr);
-	clearPCBlist(pcb);
-	
+	free(pcb);
 }
 
 /*
@@ -234,14 +234,14 @@ Postcondition: Returns the calculated run time based on config data and meta dat
 Exceptions: none
 Notes: assumes memory access/availability
 */
-void createPCB(Data *data, int *totalTime, PCB *pcb, Process *localProcess)
+PCB *createPCB(Data *data, int *totalTime, PCB *pcb, Process *localProcess)
 {
 	int processTime;
 	int cycleRate;
 	
-	PCB *localPCBptr;
+	PCB *newPCBptr;
 	
-	localPCBptr = (PCB *) malloc(sizeof(PCB));
+	newPCBptr = (PCB *) malloc(sizeof(PCB));
 	
 	while(data->mdDataPtr != NULL)
 	{
@@ -270,12 +270,12 @@ void createPCB(Data *data, int *totalTime, PCB *pcb, Process *localProcess)
 			
 			// Add data to the pcb
 				//function: addPCBnode
-			localPCBptr->opLtr = data->mdDataPtr->opLtr;
-			copyString(localPCBptr->opName, data->mdDataPtr->opName);
-			localPCBptr->processTime = processTime;
-			localPCBptr->next = NULL;
+			newPCBptr->opLtr = data->mdDataPtr->opLtr;
+			copyString(newPCBptr->opName, data->mdDataPtr->opName);
+			newPCBptr->processTime = processTime;
+			newPCBptr->next = NULL;
 			
-			pcb = addPCBnode(pcb, localPCBptr);
+			pcb = addPCBnode(pcb, newPCBptr);
 
 			if(localProcess->currentProcess == NULL)
 			{
@@ -285,8 +285,10 @@ void createPCB(Data *data, int *totalTime, PCB *pcb, Process *localProcess)
 		
 		data->mdDataPtr = data->mdDataPtr->next;
 	}
-
-	free(localPCBptr);
+	
+	free(newPCBptr);
+	
+	return pcb;
 }
 
 /*
@@ -330,12 +332,22 @@ SimCodeMessages runProcess(Process *process, ProcessData *processData, Timer *ti
 				{
 					return PTHREAD_ERROR;
 				}
+				if (pthread_join(ioThread, NULL)) 
+				{
+					fprintf(stderr,"Error while joining with child thread\n");
+					exit(1);
+				}
 				break;
 			case 'O':
 				copyString(operationType, "output");
 				if (pthread_create(&ioThread, NULL, ioProcess, (void *)arg)) 
 				{
 					return PTHREAD_ERROR;
+				}
+				if (pthread_join(ioThread, NULL)) 
+				{
+					fprintf(stderr,"Error while joining with child thread\n");
+					exit(1);
 				}
 				break;
 			case 'P':
@@ -371,6 +383,9 @@ SimCodeMessages runProcess(Process *process, ProcessData *processData, Timer *ti
 		
 		process->currentProcess = currentProcess->next;
 	}
+	
+	free(localDataPointer);
+	
 	
 	return PROCESS_COMPLETE;
 }
