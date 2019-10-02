@@ -14,11 +14,15 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	// initialize function/variables
 	char logToCode[STD_STR_LEN];
 	char fileName[STD_STR_LEN];
+	char printString[STD_STR_LEN];
 	FILE *filePtr;
+	
+	Boolean MONITOR_FLAG = True; // Default print to monitor
+	Boolean LOG_TO_FILE = True; // Default log to file
 	
 	PCB *pcb = NULL;
 	Process *localProcess;	
-	ProcessData *processDataPtr = NULL;
+	ProcessData *processDataPtr;
 	Timer *timer;
 	Data *data;
 	
@@ -29,6 +33,7 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	timer = (Timer *) malloc(sizeof(Timer));
 	localProcess = (Process *) malloc(sizeof(Process));
 	data = (Data *) malloc(sizeof(Data));
+	processDataPtr = (ProcessData *) malloc(sizeof(ProcessData));
 	
 	// Set the currentProcess to be NULL
 	localProcess->currentProcess = NULL;
@@ -36,6 +41,7 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	// store the combined data in a struct for easier function calling
 	data->configDataPtr = configData;
 	data->mdDataPtr = mdData;
+	data->processDataStart = processDataPtr;
 	
 	// Get the file name from config data and open file for writing
 		// function:copyString, fopen
@@ -51,77 +57,161 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	setStrToLowerCase(logToCode, logToCode);
 	
 	// Check if logToCode is set to file
-	if(compareString(logToCode, "file") != STR_EQ)
-	{		
-		// Start the timer
-			// function: accessTimer
-		timer->timerAccess = accessTimer(ZERO_TIMER, timer->timerString);	
-		
-		// Display System Start
-			// function: printf
-		printf("  %lf, OS: System Start\n", timer->timerAccess);
-
-		// Lap timer
-			// function: accessTimer
-		timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
-		
-		// Display PCB initialization and create PCB
-			// functio: printf, createPCB
-		printf("  %lf, OS: Create Process Control Blocks\n", timer->timerAccess);
-		createPCB(data, &timeLeft, pcb, localProcess);
-		
-		// Lap timer
-			// function: accessTimer
-		timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
-		
-		// Initialize processes to new state.
-		localProcess->state = NEW;
-		localProcess->processNumber = 0;
-		printf("  %lf, OS: All processes initialized in New state\n", timer->timerAccess);
-		
-		// Lap timer
-			// function: accessTimer
-		timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
-		
-		// Change Process state to READY state
-		localProcess->state = READY;
-		printf("  %lf, OS: All processes now set in Ready state\n", timer->timerAccess);
-		
-		// Lap timer
-			// function: accessTimer
-		timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
-		
-		printf("  %lf, OS: Process %d selected with %d ms remaining\n", timer->timerAccess, localProcess->processNumber, timeLeft);
-		
-		// Lap timer
-			// function: accessTimer
-		timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
-		
-		// Change the process to RUNNING state
-		localProcess->state = RUNNING;
-		printf("  %lf, OS: Process %d set in RUNNING state\n\n", timer->timerAccess, localProcess->processNumber);
-		
-		// Run the process
-			//function: runProcess
-		runProcess(localProcess, processDataPtr, timer);
-		
-		// Lap timer
-			// function: accessTimer
-		timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
-		
-		//  Change the state to EXIT
-		localProcess->state = EXIT;
-		printf("\n  %lf, OS: Process %d ended and set in EXIT state\n", timer->timerAccess, localProcess->processNumber);
-		
-		// Stop the timer
-			// function: accessTimer
-		timer->timerAccess = accessTimer(STOP_TIMER, timer->timerString);
-
-		printf("  %lf, OS: System stop\n", timer->timerAccess);
-		
-		printf("\nEnd Simulation - Complete\n");
-		printf("=========================\n");
+	if(compareString(logToCode, "file") == STR_EQ)
+	{	
+		MONITOR_FLAG = False;
 	}
+	else if(compareString(logToCode, "monitor") == STR_EQ)
+	{
+		LOG_TO_FILE = False;
+	}
+	
+	// Start the timer
+		// function: accessTimer
+	timer->timerAccess = accessTimer(ZERO_TIMER, timer->timerString);	
+	
+	// Display System Start
+		// function: printf
+	snprintf(printString, STD_STR_LEN, "  %lf, OS: System Start\n", timer->timerAccess);
+	
+	if(MONITOR_FLAG == True)
+	{
+		printf(printString);
+	}
+	copyString(processDataPtr->data, printString);
+	processDataPtr->next = NULL;
+	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
+	
+	// Lap timer
+		// function: accessTimer
+	timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
+	
+	// Display PCB initialization
+		// functio: printf
+	snprintf(printString, STD_STR_LEN, "  %lf, OS: Create Process Control Blocks\n", timer->timerAccess);
+	
+	if(MONITOR_FLAG == True)
+	{
+		printf(printString);
+	}
+	
+	copyString(processDataPtr->data, printString);
+	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
+	
+	// Create the PCB
+		// function: createPCB
+	createPCB(data, &timeLeft, pcb, localProcess);
+	
+	// Lap timer
+		// function: accessTimer
+	timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
+	
+	// Initialize processes to new state.
+	localProcess->state = NEW;
+	localProcess->processNumber = 0;
+	snprintf(printString, STD_STR_LEN, "  %lf, OS: All processes initialized in New state\n", timer->timerAccess);
+	
+	if(MONITOR_FLAG == True)
+	{
+		printf(printString);
+	}
+	
+	copyString(processDataPtr->data, printString);
+	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
+	
+	// Lap timer
+		// function: accessTimer
+	timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
+	
+	// Change Process state to READY state
+	localProcess->state = READY;
+	snprintf(printString, STD_STR_LEN, "  %lf, OS: All processes now set in Ready state\n", timer->timerAccess);
+	
+	if(MONITOR_FLAG == True)
+	{
+		printf(printString);
+	}
+	
+	copyString(processDataPtr->data, printString);
+	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
+	
+	// Lap timer
+		// function: accessTimer
+	timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
+	
+	snprintf(printString, STD_STR_LEN, "  %lf, OS: Process %d selected with %d ms remaining\n", timer->timerAccess, localProcess->processNumber, timeLeft);
+	
+	if(MONITOR_FLAG == True)
+	{
+		printf(printString);
+	}
+	
+	copyString(processDataPtr->data, printString);
+	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
+	
+	// Lap timer
+		// function: accessTimer
+	timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
+	
+	// Change the process to RUNNING state
+	localProcess->state = RUNNING;
+	snprintf(printString, STD_STR_LEN, "  %lf, OS: Process %d set in RUNNING state\n\n", timer->timerAccess, localProcess->processNumber);
+	
+	if(MONITOR_FLAG == True)
+	{
+		printf(printString);
+	}
+	
+	copyString(processDataPtr->data, printString);
+	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
+	
+	// Run the process
+		//function: runProcess
+	runProcess(localProcess, processDataPtr, timer, MONITOR_FLAG);
+	
+	// Lap timer
+		// function: accessTimer
+	timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
+	
+	//  Change the state to EXIT
+	localProcess->state = EXIT;
+	snprintf(printString, STD_STR_LEN, "\n  %lf, OS: Process %d ended and set in EXIT state\n", timer->timerAccess, localProcess->processNumber);
+	
+	if(MONITOR_FLAG == True)
+	{
+		printf(printString);
+	}
+	
+	copyString(processDataPtr->data, printString);
+	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
+	
+	// Stop the timer
+		// function: accessTimer
+	timer->timerAccess = accessTimer(STOP_TIMER, timer->timerString);
+
+	snprintf(printString, STD_STR_LEN, "  %lf, OS: System stop\n", timer->timerAccess);
+	
+	if(MONITOR_FLAG == True)
+	{
+		printf(printString);
+	}
+	
+	copyString(processDataPtr->data, printString);
+	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
+	
+	copyString(processDataPtr->data, "\nEnd Simulation - Complete\n");
+	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
+	
+	copyString(processDataPtr->data, "=========================\n");
+	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
+	
+	if(LOG_TO_FILE == True)
+	{
+		logToFile(filePtr, data->processDataStart);
+	}
+	
+	printf("\nEnd Simulation - Complete\n");
+	printf("=========================\n");
 	
 	// EXIT
 	fclose(filePtr);
@@ -216,10 +306,17 @@ mdDataPtr runProcess(ConfigDataType *configDataPtr, Boolean monitorFlag, Timer *
 	timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
 	return mdDataPtr->next;	
 }*/
-void runProcess(Process *process, ProcessData *processData, Timer *timer)
+SimCodeMessages runProcess(Process *process, ProcessData *processData, Timer *timer, Boolean MONITOR_FLAG)
 {
 	PCB *currentProcess;
+	ProcessData *localDataPointer;
 	char operationType[10]; // operation, input, or output
+	char printString[STD_STR_LEN];
+	
+	pthread_t ioThread;
+	struct arguments *arg;
+	
+	localDataPointer = (ProcessData *)malloc(sizeof(ProcessData));
 	
 	while(process->currentProcess != NULL)
 	{
@@ -229,9 +326,17 @@ void runProcess(Process *process, ProcessData *processData, Timer *timer)
 		{
 			case 'I':
 				copyString(operationType, "input");
+				if (pthread_create(&ioThread, NULL, ioProcess, (void *)arg)) 
+				{
+					return PTHREAD_ERROR;
+				}
 				break;
 			case 'O':
 				copyString(operationType, "output");
+				if (pthread_create(&ioThread, NULL, ioProcess, (void *)arg)) 
+				{
+					return PTHREAD_ERROR;
+				}
 				break;
 			case 'P':
 				copyString(operationType, "operation");
@@ -239,28 +344,52 @@ void runProcess(Process *process, ProcessData *processData, Timer *timer)
 		}
 		
 		timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
-		printf("  %lf, Process: %d, %s %s start\n", timer->timerAccess, process->processNumber, 
-													currentProcess->opName, operationType);
+		snprintf(printString, STD_STR_LEN, "  %lf, Process: %d, %s %s start\n", timer->timerAccess, process->processNumber, 
+																			    currentProcess->opName, operationType);
+		
+		if(MONITOR_FLAG == True)
+		{
+			printf(printString);
+		}
+		
+		copyString(localDataPointer->data, printString);
+		processData = addProcessDataNode(processData, localDataPointer);
+		
 		runTimer(currentProcess->processTime);
 		timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
-		printf("  %lf, Process: %d, %s %s end\n", timer->timerAccess, process->processNumber, 
-													currentProcess->opName, operationType);
+		
+		snprintf(printString, STD_STR_LEN, "  %lf, Process: %d, %s %s end\n", timer->timerAccess, process->processNumber, 
+																			  currentProcess->opName, operationType);
+																			  
+		if(MONITOR_FLAG == True)
+		{
+			printf(printString);
+		}
+		
+		copyString(localDataPointer->data, printString);
+		processData = addProcessDataNode(processData, localDataPointer);
+		
 		process->currentProcess = currentProcess->next;
 	}
+	
+	return PROCESS_COMPLETE;
 }
 
-/*
-Function Name: logToFile
-Algorithm: Does the same thing as runProcess but doesn't print to screen.
-Precondition: data structure containing config data and meta data,
-			  an int to store the time, a pcb struct to store the pcb,
-			  Process and 
-Postcondition: assigns new structure node to beginning of linked list
-			   or end of an established linked listunchanged
-Exceptions: none
-Notes: assumes memory access/availability
-*/
-//void logToFile(ProcessData *processDataPtr, Timer *timer)
+void *ioProcess(void *arg)
+{
+	return NULL;
+}
+
+
+void logToFile(FILE *filePtr, ProcessData *processDataPtr)
+{
+	while(processDataPtr != NULL)
+	{
+		fprintf(filePtr, processDataPtr->data);
+		
+		processDataPtr = processDataPtr->next;
+	}
+}
 
 
 /*
@@ -313,7 +442,7 @@ Postcondition: assigns new structure node to beginning of linked list
 Exceptions: none
 Notes: assumes memory access/availability
 */
-ProcessData *addProcessNode(ProcessData *localPtr, ProcessData *newNode)
+ProcessData *addProcessDataNode(ProcessData *localPtr, ProcessData *newNode)
 {
 	// check for local pointer assigned to null
 	if(localPtr == NULL)
@@ -325,10 +454,7 @@ ProcessData *addProcessNode(ProcessData *localPtr, ProcessData *newNode)
 		// assign all three values to newly created node
 		// assign next pointer to null
 			// function: copyString
-		localPtr->time = newNode->time;
-		copyString(localPtr->process, newNode->process);
-		localPtr->opLtr = newNode->opLtr;
-		copyString(localPtr->opName, newNode->opName);
+		copyString(localPtr->data, newNode->data);
 		localPtr->next = NULL;
 			
 		// return current local pointer
@@ -338,7 +464,7 @@ ProcessData *addProcessNode(ProcessData *localPtr, ProcessData *newNode)
 	// assume end of list not found yet
 	// assign recursive function to current's next link
 		// function: addNode
-	localPtr->next = addProcessNode(localPtr->next, newNode);
+	localPtr->next = addProcessDataNode(localPtr->next, newNode);
 	
 	// return current local pointer
 	return localPtr;

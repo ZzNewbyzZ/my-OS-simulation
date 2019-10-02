@@ -4,6 +4,7 @@
 
 // header files
 #include <stdio.h>
+#include <pthread.h>
 #include "StringUtils.h"
 #include "ConfigAccess.h"
 #include "MetaDataAccess.h"
@@ -11,11 +12,15 @@
 
 // global constants
 
+typedef enum { PTHREAD_ERROR = 3,
+			   PROCESS_COMPLETE} SimCodeMessages;
+
 // Struct to hold config and meta data
 typedef struct Data
 {
 	struct ConfigDataType *configDataPtr;
 	struct OpCodeType *mdDataPtr;
+	struct ProcessData *processDataStart;
 } Data;
 
 // Timer structure
@@ -53,10 +58,7 @@ typedef struct Process
 // Process data structure
 typedef struct ProcessData
 {
-	double time;
-	char process[10]; // OS or Process
-	char opLtr;
-	char opName[100]; // length of op name - 99 characters
+	char data[80];
 	
 	struct ProcessData *next;
 } ProcessData;
@@ -64,10 +66,11 @@ typedef struct ProcessData
 // function prototypes
 void runSimulation(ConfigDataType *configDataPtr, OpCodeType *mdDataPtr);
 void createPCB(Data *data, int *totalTime, PCB *pcb, Process *localProcess);
-void runProcess(Process *process, ProcessData *processData, Timer *timer);
-void logToFile(Data *data, int timeLeft, PCB *pcb, Process *localProcess, ProcessData *processDataPtr, Timer *timer);
+SimCodeMessages runProcess(Process *process, ProcessData *processData, Timer *timer, Boolean MONITOR_FLAG);
+void *ioProcess(void *arg);
+void logToFile(FILE *filePtr, ProcessData *processDataPtr);
 PCB *addPCBnode(PCB *localPtr, PCB *newNode);
-ProcessData *addProcessNode(ProcessData *localPtr, ProcessData *newNode);
+ProcessData *addProcessDataNode(ProcessData *localPtr, ProcessData *newNode);
 ProcessData *clearProcessDataList(ProcessData *localPtr);
 PCB *clearPCBlist(PCB *localPtr);
 
