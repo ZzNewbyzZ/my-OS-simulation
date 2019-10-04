@@ -51,7 +51,7 @@ ConfigDataCodes getCpuSchedCode(char *codeStr);
 Boolean valueInRange(int lineCode, int intVale,
 					 double doubleVal, long int longVal, char *stringVale);
 ConfigDataCodes getLogToCode(char *logToStr);
-void displayConfigData(ConfigDataType *configData);
+void displayConfigData(ConfigDataType *configData, FILE *filePtr);
 void configCodeToString(int code, char *outString);
 void displayConfigError(int errCode);
 void clearConfigData(ConfigDataType **configDataPtr);

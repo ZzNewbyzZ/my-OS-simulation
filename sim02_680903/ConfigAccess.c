@@ -635,26 +635,26 @@ Postcondition: configuration data is displayed to the screen
 Exceptions: none
 Notes: none
 */
-void displayConfigData(ConfigDataType *configData)
+void displayConfigData(ConfigDataType *configData, FILE *filePtr)
 {
 	// initialize function/variables
 	char displayString[STD_STR_LEN];
 	
 	// print lines of display
 		// function: printf, configCodeToString (translates coded items)
-	printf("\nConfig File Display\n");
-	printf("===================\n\n");
-	printf("Version                 : %3.2f\n", configData->version);
-	printf("Program file name       : %s\n", configData->metaDataFileName);
+	fprintf(filePtr, "==================================================\n");
+	fprintf(filePtr, "Simulator Log File Header\n\n");
+	//fprintf(filePtr, "Version                 : %3.2f\n", configData->version);
+	fprintf(filePtr, "File Name                      : %s\n", configData->metaDataFileName);
 	configCodeToString(configData->cpuSchedCode, displayString);
-	printf("CPU schedule selection  : %s\n", displayString);
-	printf("Quantum time            : %d\n", configData->quantumCycles);
-	printf("Memory Available        : %ld\n", configData->memAvailable);
-	printf("Process cycle rate      : %d\n", configData->procCycleRate);
-	printf("I/O cycle rate          : %d\n", configData->ioCycleRate);
-	configCodeToString(configData->logToCode, displayString);
-	printf("Log to selection        : %s\n", displayString);
-	printf("Log file name           : %s\n", configData->logToFileName);
+	fprintf(filePtr, "CPU schedule                   : %s\n", displayString);
+	fprintf(filePtr, "Quantum Cycles                 : %d\n", configData->quantumCycles);
+	fprintf(filePtr, "Memory Available (KB)          : %ld\n", configData->memAvailable);
+	fprintf(filePtr, "Process Cycle Rate (ms/cycle)  : %d\n", configData->procCycleRate);
+	fprintf(filePtr, "I/O Cycle Rate (ms/cycle)      : %d\n\n", configData->ioCycleRate);
+	//configCodeToString(configData->logToCode, displayString);
+	//fprintf(filePtr, "Log to selection        : %s\n", displayString);
+	//fprintf(filePtr, "Log file name           : %s\n", configData->logToFileName);
 	
 	// no return needed
 }

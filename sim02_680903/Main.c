@@ -113,11 +113,6 @@ int main( int argc, char **argv )
         return 0;
 	}
 	
-	// Display Title
-		// funciton: printf
-	printf("\n================\n");
-	printf("Begin Simulation\n\n");
-	
 	// Begin the simulation
 		// function: startSimulation
 	runSimulation(configDataPtr, mdData);

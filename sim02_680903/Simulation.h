@@ -69,7 +69,7 @@ void runSimulation(ConfigDataType *configDataPtr, OpCodeType *mdDataPtr);
 PCB *createPCB(Data *data, int *totalTime, PCB *pcb, Process *localProcess);
 SimCodeMessages runProcess(Process *process, ProcessData *processData, Timer *timer, Boolean MONITOR_FLAG);
 void *ioProcess(void *arg);
-void logToFile(FILE *filePtr, ProcessData *processDataPtr);
+void logToFile(FILE *filePtr, Data *data);
 PCB *addPCBnode(PCB *localPtr, PCB *newNode);
 ProcessData *addProcessDataNode(ProcessData *localPtr, ProcessData *newNode);
 ProcessData *clearProcessDataList(ProcessData *localPtr);

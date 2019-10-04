@@ -41,7 +41,6 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	// store the combined data in a struct for easier function calling
 	data->configDataPtr = configData;
 	data->mdDataPtr = mdData;
-	data->processDataStart = processDataPtr;
 	
 	// Get the file name from config data and open file for writing
 		// function:copyString, fopen
@@ -66,6 +65,17 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 		LOG_TO_FILE = False;
 	}
 	
+	// Display Title
+		// funciton: printf
+	printf("\n================\n");
+	printf("Begin Simulation\n\n");
+	
+	snprintf(printString, STD_STR_LEN, "Begin Simulation\n\n");
+	copyString(processDataPtr->data, printString);
+	processDataPtr->next = NULL;
+	data->processDataStart = processDataPtr;
+	processDataPtr = addProcessDataNode(data->processDataStart, processDataPtr);
+	
 	// Start the timer
 		// function: accessTimer
 	timer->timerAccess = accessTimer(ZERO_TIMER, timer->timerString);	
@@ -74,12 +84,14 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 		// function: printf
 	snprintf(printString, STD_STR_LEN, "  %lf, OS: System Start\n", timer->timerAccess);
 	
+	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
 	{
 		printf(printString);
 	}
+	
+	// Add the data to the struct for file log
 	copyString(processDataPtr->data, printString);
-	processDataPtr->next = NULL;
 	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
 	
 	// Lap timer
@@ -90,11 +102,13 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 		// functio: printf
 	snprintf(printString, STD_STR_LEN, "  %lf, OS: Create Process Control Blocks\n", timer->timerAccess);
 	
+	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
 	{
 		printf(printString);
 	}
 	
+	// Add the data to the struct for file log
 	copyString(processDataPtr->data, printString);
 	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
 	
@@ -111,11 +125,13 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	localProcess->processNumber = 0;
 	snprintf(printString, STD_STR_LEN, "  %lf, OS: All processes initialized in New state\n", timer->timerAccess);
 	
+	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
 	{
 		printf(printString);
 	}
 	
+	// Add the data to the struct for file log
 	copyString(processDataPtr->data, printString);
 	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
 	
@@ -127,11 +143,13 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	localProcess->state = READY;
 	snprintf(printString, STD_STR_LEN, "  %lf, OS: All processes now set in Ready state\n", timer->timerAccess);
 	
+	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
 	{
 		printf(printString);
 	}
 	
+	// Add the data to the struct for file log
 	copyString(processDataPtr->data, printString);
 	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
 	
@@ -141,11 +159,13 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	
 	snprintf(printString, STD_STR_LEN, "  %lf, OS: Process %d selected with %d ms remaining\n", timer->timerAccess, localProcess->processNumber, timeLeft);
 	
+	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
 	{
 		printf(printString);
 	}
 	
+	// Add the data to the struct for file log
 	copyString(processDataPtr->data, printString);
 	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
 	
@@ -157,11 +177,13 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	localProcess->state = RUNNING;
 	snprintf(printString, STD_STR_LEN, "  %lf, OS: Process %d set in RUNNING state\n\n", timer->timerAccess, localProcess->processNumber);
 	
+	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
 	{
 		printf(printString);
 	}
 	
+	// Add the data to the struct for file log
 	copyString(processDataPtr->data, printString);
 	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
 	
@@ -177,11 +199,13 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	localProcess->state = EXIT;
 	snprintf(printString, STD_STR_LEN, "\n  %lf, OS: Process %d ended and set in EXIT state\n", timer->timerAccess, localProcess->processNumber);
 	
+	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
 	{
 		printf(printString);
 	}
 	
+	// Add the data to the struct for file log
 	copyString(processDataPtr->data, printString);
 	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
 	
@@ -191,11 +215,13 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 
 	snprintf(printString, STD_STR_LEN, "  %lf, OS: System stop\n", timer->timerAccess);
 	
+	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
 	{
 		printf(printString);
 	}
 	
+	// Add the data to the struct for file log
 	copyString(processDataPtr->data, printString);
 	processDataPtr = addProcessDataNode(processDataPtr, processDataPtr);
 	
@@ -207,7 +233,7 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	
 	if(LOG_TO_FILE == True)
 	{
-		logToFile(filePtr, data->processDataStart);
+		logToFile(filePtr, data);
 	}
 	
 	printf("\nEnd Simulation - Complete\n");
@@ -396,8 +422,13 @@ void *ioProcess(void *arg)
 }
 
 
-void logToFile(FILE *filePtr, ProcessData *processDataPtr)
+void logToFile(FILE *filePtr, Data *data)
 {
+	ProcessData *processDataPtr = data->processDataStart;
+	ConfigDataType *configDataPtr = data->configDataPtr;
+	
+	displayConfigData(configDataPtr, filePtr);
+	
 	while(processDataPtr != NULL)
 	{
 		fprintf(filePtr, processDataPtr->data);
