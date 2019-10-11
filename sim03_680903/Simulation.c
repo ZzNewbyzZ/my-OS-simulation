@@ -328,30 +328,33 @@ Postcondition: assigns new process data structure node to end of linked list
 			   and returns new node.
 Exceptions: none
 Notes: assumes memory access/availability
-
-mdDataPtr runProcess(ConfigDataType *configDataPtr, Boolean monitorFlag, Timer *timer, ProcessData *localHeadPtr)
-{
-	timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
-	return mdDataPtr->next;	
-}*/
+*/
 SimCodeMessages runProcess(Process *process, ProcessData *processData, Timer *timer, Boolean MONITOR_FLAG)
 {
+	// initialize funciton/variables
 	PCB *currentProcess;
 	ProcessData *localDataPointer;
 	char operationType[10]; // operation, input, or output
 	char printString[STD_STR_LEN];
 	
+	// initialize POSIX thread
 	pthread_t ioThread;
 	struct arguments *arg;
 	
+	// Allocate memory for data storage
+		// function: malloc
 	localDataPointer = (ProcessData *)malloc(sizeof(ProcessData));
 	
+	// Loop through the process
 	while(process->currentProcess != NULL)
 	{
+		// Skip the first process because it is a placeholder
 		currentProcess = process->currentProcess;
 		
+		// Check for type of process
 		switch(currentProcess->opLtr)
 		{
+			// Input must create POSIX thread
 			case 'I':
 				copyString(operationType, "input");
 				if (pthread_create(&ioThread, NULL, ioProcess, (void *)arg)) 
@@ -364,6 +367,7 @@ SimCodeMessages runProcess(Process *process, ProcessData *processData, Timer *ti
 					exit(1);
 				}
 				break;
+			// Output must create POSIX thread
 			case 'O':
 				copyString(operationType, "output");
 				if (pthread_create(&ioThread, NULL, ioProcess, (void *)arg)) 
@@ -376,63 +380,94 @@ SimCodeMessages runProcess(Process *process, ProcessData *processData, Timer *ti
 					exit(1);
 				}
 				break;
+			// Operation, store to operationType
 			case 'P':
 				copyString(operationType, "operation");
 				break;
 		}
 		
+		// Lapt timer
 		timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
 		snprintf(printString, STD_STR_LEN, "  %lf, Process: %d, %s %s start\n", timer->timerAccess, process->processNumber, 
 																			    currentProcess->opName, operationType);
-		
+		// Check for log to monitor
 		if(MONITOR_FLAG == True)
 		{
 			printf(printString);
 		}
 		
+		// Store data in linked list
 		copyString(localDataPointer->data, printString);
 		processData = addProcessDataNode(processData, localDataPointer);
 		
+		// Run timer for alloted time and lap.
 		runTimer(currentProcess->processTime);
 		timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
 		
 		snprintf(printString, STD_STR_LEN, "  %lf, Process: %d, %s %s end\n", timer->timerAccess, process->processNumber, 
 																			  currentProcess->opName, operationType);
-																			  
+		// Check for log to monitor																	  
 		if(MONITOR_FLAG == True)
 		{
 			printf(printString);
 		}
 		
+		// Store data in linked list
 		copyString(localDataPointer->data, printString);
 		processData = addProcessDataNode(processData, localDataPointer);
 		
+		// Step to next process in linked list.
 		process->currentProcess = currentProcess->next;
 	}
 	
+	// Free memory and exit success
 	free(localDataPointer);
 	
 	
 	return PROCESS_COMPLETE;
 }
 
+
+/*
+Function Name: ioProcess
+Algorithm: Does nothing right now
+Precondition: A struct of arguments
+Postcondition: none
+Exceptions: none
+Notes: none
+*/
 void *ioProcess(void *arg)
 {
 	return NULL;
 }
 
-
+/*
+Function Name: logToFile
+Algorithm: Takes the created data and stores it into the designated file.
+Precondition: An open file pointer and a linked list of data to be stored.
+Postcondition: Assumes the file pointer is already open.
+Exceptions: none
+Notes: none
+*/
 void logToFile(FILE *filePtr, Data *data)
 {
+	// initialize function/variables
 	ProcessData *processDataPtr = data->processDataStart;
 	ConfigDataType *configDataPtr = data->configDataPtr;
 	
+	
+	// Display the config data at top of file.
+		// function: displayConfigData
 	displayConfigData(configDataPtr, filePtr);
 	
+	// Loop through the linked list
 	while(processDataPtr != NULL)
 	{
+		// Print the data to the file
+			// function: fprintf
 		fprintf(filePtr, processDataPtr->data);
 		
+		// Move to the item in the linked list
 		processDataPtr = processDataPtr->next;
 	}
 }
