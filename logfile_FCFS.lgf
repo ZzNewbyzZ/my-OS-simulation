@@ -1,0 +1,216 @@
+
+==================================================
+Simulator Log File Header
+
+File Name                       : metadata5mn.mdf
+CPU Scheduling                  : FCFS-N
+Quantum Cycles                  : 15
+Memory Available (KB)           : 500
+Processor Cycle Rate (ms/cycle) : 6
+I/O Cycle Rate (ms/cycle)       : 28
+
+================
+Begin Simulation
+
+  0.000000, OS: System Start
+  0.000003, OS: Create Process Control Blocks
+  0.000010, OS: All processes initialized in New state
+  0.000013, OS: All processes now set in Ready state
+  0.000028, OS: Process 0 selected with 9842 ms remaining
+  0.000032, OS: Process 0 set in RUNNING state
+
+  0.000037, Process: 0, MMU attempt to allocate 5/10/200
+  0.000042, Process: 0, MMU successful allocate
+  0.000046, Process: 0, hard drive input start
+  0.756050, Process: 0, hard drive input end
+  0.756056, Process: 0, printer output start
+  2.856061, Process: 0, printer output end
+  2.856067, Process: 0, run operation start
+  2.892070, Process: 0, run operation end
+  2.892077, Process: 0, run operation start
+  2.952081, Process: 0, run operation end
+  2.952086, Process: 0, printer output start
+  3.652090, Process: 0, printer output end
+  3.652095, Process: 0, run operation start
+  3.730099, Process: 0, run operation end
+  3.730104, Process: 0, printer output start
+  5.270109, Process: 0, printer output end
+  5.270116, Process: 0, MMU attempt to access 5/10/100
+  5.270120, Process: 0, MMU successful access
+  5.270123, Process: 0, printer output start
+  5.970127, Process: 0, printer output end
+  5.970133, Process: 0, run operation start
+  6.048137, Process: 0, run operation end
+  6.048143, Process: 0, hard drive input start
+  6.636147, Process: 0, hard drive input end
+  6.636153, Process: 0, keyboard input start
+  9.716158, Process: 0, keyboard input end
+  9.716164, Process: 0, run operation start
+  9.800168, Process: 0, run operation end
+  9.800173, Process: 0, run operation start
+  9.842177, Process: 0, run operation end
+
+  9.842181, OS: Process 0 ended and set in EXIT state
+  9.842187, OS: Process 1 selected with 13012 ms remaining
+  9.842190, OS: Process 1 set in RUNNING state
+
+  9.842194, Process: 1, MMU attempt to allocate 5/20/250
+  9.842199, Process: 1, MMU successful allocate
+  9.842203, Process: 1, printer output start
+ 11.662207, Process: 1, printer output end
+ 11.662213, Process: 1, run operation start
+ 11.728217, Process: 1, run operation end
+ 11.728223, Process: 1, run operation start
+ 11.806227, Process: 1, run operation end
+ 11.806231, Process: 1, monitor output start
+ 12.534236, Process: 1, monitor output end
+ 12.534242, Process: 1, hard drive output start
+ 13.626251, Process: 1, hard drive output end
+ 13.626257, Process: 1, keyboard input start
+ 15.866262, Process: 1, keyboard input end
+ 15.866269, Process: 1, hard drive output start
+ 16.286274, Process: 1, hard drive output end
+ 16.286281, Process: 1, MMU attempt to access 5/20/200
+ 16.286285, Process: 1, MMU successful access
+ 16.286289, Process: 1, hard drive input start
+ 17.294293, Process: 1, hard drive input end
+ 17.294299, Process: 1, hard drive output start
+ 17.882304, Process: 1, hard drive output end
+ 17.882310, Process: 1, run operation start
+ 17.912314, Process: 1, run operation end
+ 17.912320, Process: 1, run operation start
+ 17.954324, Process: 1, run operation end
+ 17.954330, Process: 1, hard drive output start
+ 19.214335, Process: 1, hard drive output end
+ 19.214342, Process: 1, keyboard input start
+ 22.854347, Process: 1, keyboard input end
+
+ 22.854354, OS: Process 1 ended and set in EXIT state
+ 22.854360, OS: Process 2 selected with 12376 ms remaining
+ 22.854363, OS: Process 2 set in RUNNING state
+
+ 22.854367, Process: 2, MMU attempt to allocate 11/20/300
+ 22.854373, Process: 2, MMU successful allocate
+ 22.854377, Process: 2, hard drive input start
+ 24.114381, Process: 2, hard drive input end
+ 24.114387, Process: 2, run operation start
+ 24.198391, Process: 2, run operation end
+ 24.198398, Process: 2, keyboard input start
+ 27.838403, Process: 2, keyboard input end
+ 27.838410, Process: 2, run operation start
+ 27.916414, Process: 2, run operation end
+ 27.916420, Process: 2, run operation start
+ 28.006424, Process: 2, run operation end
+ 28.006430, Process: 2, run operation start
+ 28.096442, Process: 2, run operation end
+ 28.096447, Process: 2, MMU attempt to allocate 11/20/400
+ 28.096455, Process: 2, MMU failed to allocate
+
+ 28.096458, OS: Process 2 experiences segmentation fault
+ 28.096464, OS: Process 2 ended and set in EXIT state
+ 28.096468, OS: Process 3 selected with 6854 ms remaining
+ 28.096472, OS: Process 3 set in RUNNING state
+
+ 28.096476, Process: 3, hard drive output start
+ 28.600482, Process: 3, hard drive output end
+ 28.600489, Process: 3, MMU attempt to allocate 11/20/300
+ 28.600494, Process: 3, MMU successful allocate
+ 28.600498, Process: 3, printer output start
+ 29.720503, Process: 3, printer output end
+ 29.720510, Process: 3, hard drive input start
+ 30.308515, Process: 3, hard drive input end
+ 30.308522, Process: 3, monitor output start
+ 30.980527, Process: 3, monitor output end
+ 30.980533, Process: 3, printer output start
+ 31.820538, Process: 3, printer output end
+ 31.820545, Process: 3, MMU attempt to access 11/20/200
+ 31.820549, Process: 3, MMU successful access
+ 31.820553, Process: 3, monitor output start
+ 32.212558, Process: 3, monitor output end
+ 32.212565, Process: 3, printer output start
+ 32.912570, Process: 3, printer output end
+ 32.912576, Process: 3, hard drive input start
+ 33.920582, Process: 3, hard drive input end
+ 33.920589, Process: 3, run operation start
+ 33.974593, Process: 3, run operation end
+ 33.974600, Process: 3, monitor output start
+ 34.254606, Process: 3, monitor output end
+ 34.254613, Process: 3, MMU attempt to access 11/20/400
+ 34.254618, Process: 3, MMU failed to access
+
+ 34.254622, OS: Process 3 experiences segmentation fault
+ 34.254627, OS: Process 3 ended and set in EXIT state
+ 34.254632, OS: Process 4 selected with 8668 ms remaining
+ 34.254636, OS: Process 4 set in RUNNING state
+
+ 34.254640, Process: 4, MMU attempt to allocate 12/10/400
+ 34.254646, Process: 4, MMU successful allocate
+ 34.254654, Process: 4, run operation start
+ 34.320658, Process: 4, run operation end
+ 34.320663, Process: 4, hard drive input start
+ 34.908668, Process: 4, hard drive input end
+ 34.908675, Process: 4, hard drive input start
+ 36.084681, Process: 4, hard drive input end
+ 36.084688, Process: 4, MMU attempt to access 12/10/250
+ 36.084693, Process: 4, MMU successful access
+ 36.084697, Process: 4, run operation start
+ 36.126701, Process: 4, run operation end
+ 36.126707, Process: 4, keyboard input start
+ 37.526712, Process: 4, keyboard input end
+ 37.526719, Process: 4, run operation start
+ 37.562724, Process: 4, run operation end
+ 37.562729, Process: 4, hard drive output start
+ 38.402735, Process: 4, hard drive output end
+ 38.402742, Process: 4, printer output start
+ 40.502748, Process: 4, printer output end
+ 40.502755, Process: 4, run operation start
+ 40.550760, Process: 4, run operation end
+ 40.550765, Process: 4, keyboard input start
+ 41.950771, Process: 4, keyboard input end
+ 41.950779, Process: 4, run operation start
+ 41.998784, Process: 4, run operation end
+ 41.998791, Process: 4, hard drive output start
+ 42.838796, Process: 4, hard drive output end
+ 42.838804, Process: 4, run operation start
+ 42.922808, Process: 4, run operation end
+
+ 42.922815, OS: Process 4 ended and set in EXIT state
+ 42.922821, OS: Process 5 selected with 10942 ms remaining
+ 42.922825, OS: Process 5 set in RUNNING state
+
+ 42.922830, Process: 5, MMU attempt to allocate 11/10/490
+ 42.922836, Process: 5, MMU successful allocate
+ 42.922840, Process: 5, hard drive input start
+ 43.930846, Process: 5, hard drive input end
+ 43.930853, Process: 5, run operation start
+ 43.978862, Process: 5, run operation end
+ 43.978867, Process: 5, run operation start
+ 44.008872, Process: 5, run operation end
+ 44.008877, Process: 5, printer output start
+ 45.128883, Process: 5, printer output end
+ 45.128890, Process: 5, keyboard input start
+ 48.208896, Process: 5, keyboard input end
+ 48.208904, Process: 5, run operation start
+ 48.262909, Process: 5, run operation end
+ 48.262914, Process: 5, keyboard input start
+ 49.662920, Process: 5, keyboard input end
+ 49.662928, Process: 5, printer output start
+ 50.502933, Process: 5, printer output end
+ 50.502941, Process: 5, run operation start
+ 50.556945, Process: 5, run operation end
+ 50.556952, Process: 5, keyboard input start
+ 52.796958, Process: 5, keyboard input end
+ 52.796966, Process: 5, run operation start
+ 52.868971, Process: 5, run operation end
+ 52.868981, Process: 5, run operation start
+ 52.940986, Process: 5, run operation end
+ 52.940994, Process: 5, MMU attempt to access 11/10/600
+ 52.940999, Process: 5, MMU failed to access
+
+ 52.941004, OS: Process 5 experiences segmentation fault
+ 52.941009, OS: Process 5 ended and set in EXIT state
+ 52.941016, OS: System stop
+
+End Simulation - Complete
+=========================
+

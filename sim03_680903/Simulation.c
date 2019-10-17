@@ -26,8 +26,6 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	Timer *timer;
 	Data *data;
 	
-	int timeLeft = 0;
-	
 	// allocate memory for the temporary data structures
 		// function: malloc	
 	timer = (Timer *) malloc(sizeof(Timer));
@@ -37,6 +35,7 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	
 	// Set the currentProcess to be NULL
 	localProcess->currentProcess = NULL;
+	localProcess->next = NULL;
 	
 	// store the combined data in a struct for easier function calling
 	data->configDataPtr = configData;
@@ -114,16 +113,17 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	
 	// Create the PCB
 		// function: createPCB
-	pcb = createPCB(data, &timeLeft, pcb, localProcess);
+	pcb = createPCB(data, pcb, localProcess);
 	
 	// Lap timer
 		// function: accessTimer
 	timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
 	
 	// Initialize processes to new state.
-	localProcess->state = NEW;
-	localProcess->processNumber = 0;
-	snprintf(printString, STD_STR_LEN, "  %lf, OS: All processes initialized in New state\n", timer->timerAccess);
+		// function: setNew
+	snprintf(printString, STD_STR_LEN, 
+				"  %lf, OS: All processes initialized in New state\n", 
+				timer->timerAccess);
 	
 	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
@@ -140,8 +140,10 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
 	
 	// Change Process state to READY state
-	localProcess->state = READY;
-	snprintf(printString, STD_STR_LEN, "  %lf, OS: All processes now set in Ready state\n", timer->timerAccess);
+		// function: setReady
+	snprintf(printString, STD_STR_LEN, 
+				"  %lf, OS: All processes now set in Ready state\n", 
+				timer->timerAccess);
 	
 	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
@@ -157,7 +159,9 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 		// function: accessTimer
 	timer->timerAccess = accessTimer(LAP_TIMER, timer->timerString);
 	
-	snprintf(printString, STD_STR_LEN, "  %lf, OS: Process %d selected with %d ms remaining\n", timer->timerAccess, localProcess->processNumber, timeLeft);
+	snprintf(printString, STD_STR_LEN, 
+				"  %lf, OS: Process %d selected with %d ms remaining\n", 
+				timer->timerAccess, localProcess->processNumber, localProcess->timeLeft);
 	
 	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
@@ -175,7 +179,9 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	
 	// Change the process to RUNNING state
 	localProcess->state = RUNNING;
-	snprintf(printString, STD_STR_LEN, "  %lf, OS: Process %d set in RUNNING state\n\n", timer->timerAccess, localProcess->processNumber);
+	snprintf(printString, STD_STR_LEN, 
+				"  %lf, OS: Process %d set in RUNNING state\n\n", 
+				timer->timerAccess, localProcess->processNumber);
 	
 	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
@@ -197,7 +203,9 @@ void runSimulation(ConfigDataType *configData, OpCodeType *mdData)
 	
 	//  Change the state to EXIT
 	localProcess->state = EXIT;
-	snprintf(printString, STD_STR_LEN, "\n  %lf, OS: Process %d ended and set in EXIT state\n", timer->timerAccess, localProcess->processNumber);
+	snprintf(printString, STD_STR_LEN, 
+				"\n  %lf, OS: Process %d ended and set in EXIT state\n", 
+				timer->timerAccess, localProcess->processNumber);
 	
 	// Check for monitor flag and print to screen
 	if(MONITOR_FLAG == True)
@@ -256,25 +264,43 @@ Function Name: createPCB
 Algorithm: creates the PCB and calculates the total runtime.
 Precondition: Two pointers, one to the config data and the other to
 			  the first meta data op code.
-Postcondition: Returns the calculated run time based on config data and meta data
+Postcondition: Returns the pcb created for that process
 Exceptions: none
 Notes: assumes memory access/availability
 */
-PCB *createPCB(Data *data, int *totalTime, PCB *pcb, Process *localProcess)
+PCB *createPCB(Data *data, PCB *pcb, Process *localProcess)
 {
+	// initialize function/variables
 	int processTime;
 	int cycleRate;
 	
 	PCB *newPCBptr;
+	Process *newProcess;
 	
 	newPCBptr = (PCB *) malloc(sizeof(PCB));
+	newProcess = (Process *) malloc(sizeof(Process));
 	
+	localProcess->timeLeft = 0;
+	
+	// Loop through meta data
 	while(data->mdDataPtr != NULL)
 	{
-		if(data->mdDataPtr->opLtr != 'S'
-		   && data->mdDataPtr->opLtr != 'A')
+		if(data->mdDataPtr->opLtr == 'A')
 		{
-			// Determine the cycle rate for that process.
+			// Check if application end
+			if(compareString(data->mdDataPtr->opName, "end") == STR_EQ)
+			{
+				// free the temp memory
+				free(newPCBptr);
+				free(newProcess);
+				
+				return pcb;
+			}
+				
+		}
+		else if(data->mdDataPtr->opLtr != 'S')
+		{
+			// Determine the cycle rate for that process
 			switch(data->mdDataPtr->opLtr)
 			{
 				case 'I':
@@ -289,10 +315,11 @@ PCB *createPCB(Data *data, int *totalTime, PCB *pcb, Process *localProcess)
 					break;
 			}
 			
+			// Calculate the process time
 			processTime = cycleRate * data->mdDataPtr->opValue;
 			
-			
-			*totalTime += processTime;
+			// Add the time to the processTime
+			localProcess->timeLeft += processTime;
 			
 			// Add data to the pcb
 				//function: addPCBnode
@@ -302,17 +329,20 @@ PCB *createPCB(Data *data, int *totalTime, PCB *pcb, Process *localProcess)
 			newPCBptr->next = NULL;
 			
 			pcb = addPCBnode(pcb, newPCBptr);
-
+			
+			// Store the first pcb into the process
 			if(localProcess->currentProcess == NULL)
 			{
 				localProcess->currentProcess = pcb;
 			}			
 		}
 		
+		// go to next data
 		data->mdDataPtr = data->mdDataPtr->next;
 	}
 	
 	free(newPCBptr);
+	free(newProcess);
 	
 	return pcb;
 }
@@ -474,7 +504,7 @@ void logToFile(FILE *filePtr, Data *data)
 
 
 /*
-Function Name: addNode
+Function Name: addPCBnode
 Algorithm: adds process structure with data to a linked list
 Precondition: linked list pointer assigned to null or to one process link,
 			  struct pointer assigned to process struct data
@@ -514,7 +544,7 @@ PCB *addPCBnode(PCB *localPtr, PCB *newNode)
 }
 
 /*
-Function Name: addNode
+Function Name: addProcessDataNode
 Algorithm: adds process structure with data to a linked list
 Precondition: linked list pointer assigned to null or to one process link,
 			  struct pointer assigned to process struct data
@@ -546,6 +576,50 @@ ProcessData *addProcessDataNode(ProcessData *localPtr, ProcessData *newNode)
 	// assign recursive function to current's next link
 		// function: addNode
 	localPtr->next = addProcessDataNode(localPtr->next, newNode);
+	
+	// return current local pointer
+	return localPtr;
+}
+
+/*
+Function Name: addProcessNode
+Algorithm: adds process structure with data to a linked list
+Precondition: linked list pointer assigned to null or to one process link,
+			  struct pointer assigned to process struct data
+Postcondition: assigns new structure node to beginning of linked list
+			   or end of an established linked listunchanged
+Exceptions: none
+Notes: assumes memory access/availability
+*/
+Process *addProcessNode(Process *localPtr, Process *newNode)
+{
+	// initialize funciton/variables
+	int nextProcessNum = localPtr->processNumber + 1;
+	
+	// check for local pointer assigned to null
+	if(localPtr == NULL)
+	{	
+		// access memory for new link/node
+			// function: malloc
+		localPtr = (Process *)malloc(sizeof(Process));
+		
+		// assign all three values to newly created node
+		// assign next pointer to null
+			// function: copyString
+		int processNumber = nextProcessNum;
+		localPtr->state = NEW;
+		localPtr->timeLeft = 0;
+		localPtr->currentProcess = NULL;
+		localPtr->next = NULL;
+			
+		// return current local pointer
+		return localPtr;
+	}
+	
+	// assume end of list not found yet
+	// assign recursive function to current's next link
+		// function: addNode
+	localPtr->next = addPCBnode(localPtr->next, newNode);
 	
 	// return current local pointer
 	return localPtr;
@@ -604,6 +678,38 @@ PCB *clearPCBlist(PCB *localPtr)
 			// call recursive function with next pointer
 				// function: clearMetaDataList
 			clearPCBlist(localPtr->next);
+		}
+		
+		// after recursive call, release memory to OS
+			// function: free
+		free(localPtr);
+	}
+	
+	// return null to calling function
+	return NULL; 
+}
+
+/*
+Function Name: clearProcess
+Algorithm: recursively iterates through process linked list,
+		   returns memory to OS from the bottom of the list upward
+Precondition: linked list, with or without data
+Postcondition: all node memory, if any, is returned to OS
+			   return pointer (head) is set to null
+Exceptions: none
+Notes: none
+*/
+Process *clearProcess(Process *localPtr)
+{
+	// check for local pointer not set to null (list not empty)
+	if(localPtr != NULL)
+	{		
+		// check for local pointer's next node not null
+		if(localPtr->next != NULL)
+		{		
+			// call recursive function with next pointer
+				// function: clearMetaDataList
+			clearProcess(localPtr->next);
 		}
 		
 		// after recursive call, release memory to OS

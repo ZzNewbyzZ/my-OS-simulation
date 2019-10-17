@@ -15,6 +15,13 @@
 
 typedef enum { PTHREAD_ERROR = 3,
 			   PROCESS_COMPLETE} SimCodeMessages;
+			   
+// List of States
+typedef enum { NEW,
+			   READY,
+			   RUNNING,
+			   WAITING,
+			   EXIT} STATE;
 
 // Struct to hold config and meta data
 typedef struct Data
@@ -30,13 +37,6 @@ typedef struct Timer
 	char timerString[10];
 	double timerAccess;
 } Timer;
-
-// List of States
-typedef enum { NEW,
-			   READY,
-			   RUNNING,
-			   WAITING,
-			   EXIT} STATE;
 			   
 // PCB structure
 typedef struct PCB
@@ -48,12 +48,15 @@ typedef struct PCB
 	struct PCB *next;
 } PCB;
 
-// Process structure
+// Process structure -- linked list with last node pointing to first
 typedef struct Process
 {
 	int processNumber;
 	STATE state;
+	int timeLeft;
 	struct PCB *currentProcess;
+	
+	struct Process *next;
 } Process;
 
 // Process data structure
@@ -66,7 +69,7 @@ typedef struct ProcessData
 
 // function prototypes
 void runSimulation(ConfigDataType *configDataPtr, OpCodeType *mdDataPtr);
-PCB *createPCB(Data *data, int *totalTime, PCB *pcb, Process *localProcess);
+PCB *createPCB(Data *data, PCB *pcb, Process *localProcess);
 SimCodeMessages runProcess(Process *process, ProcessData *processData, Timer *timer, Boolean MONITOR_FLAG);
 void *ioProcess(void *arg);
 void logToFile(FILE *filePtr, Data *data);
